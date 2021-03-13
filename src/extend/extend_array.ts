@@ -1,11 +1,13 @@
 declare global {
     interface Array<T> {
         unique(uniqueIDKey?: string): Array<T>;
+        valid(): Array<T>;
         first(): T, last(): T;
     }
 }
 
 const extend = (o: typeof Array) => {
+    const nulls = [null, undefined]
     // Extend unique prototype to JS String
     o.prototype.unique = function (uniqueIDKey?: string) {
         // For Array of Objects
@@ -22,6 +24,15 @@ const extend = (o: typeof Array) => {
         return this.reduce(
             (result, entry) => (
                 result.indexOf(entry) == -1 && (result.push(entry)),
+                result
+            ),
+            []
+        );
+    }
+    o.prototype.valid = function () {
+        return this.reduce(
+            (result, entry) => (
+                window.isValid(entry) && result.push(entry),
                 result
             ),
             []
