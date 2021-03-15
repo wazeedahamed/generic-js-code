@@ -1,9 +1,7 @@
+import { IArrayGlobal } from "../interface/iarray";
+
 declare global {
-    interface Array<T> {
-        unique(uniqueIDKey?: string): Array<T>;
-        valid(): Array<T>;
-        first(): T, last(): T;
-    }
+    interface Array<T> extends IArrayGlobal<T> { }
 }
 
 const extend = (o: typeof Array) => {

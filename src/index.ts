@@ -1,13 +1,15 @@
-import * as Method_Validation from './extend/method_validation';
-import * as Method_Url from './extend/method_url';
-import * as Extend_String from './extend/extend_string';
-import * as Extend_Array from './extend/extend_array';
+import * as array from "./extend/array";
+import * as string from "./extend/string";
+import * as validation from "./method/validation";
+import * as url from "./method/url";
+import * as xml from "./method/xml";
 
-const extend = () => {
-    Method_Validation.extend(window);
-    Method_Url.extend(window);
-    Extend_String.extend(String);
-    Extend_Array.extend(Array);
+const process = () => {
+    return array.extend(Array) &&
+        string.extend(String) &&
+        validation.define(window) &&
+        url.define(window) &&
+        xml.define(window);
 }
 
-export { extend }
+export { process }
