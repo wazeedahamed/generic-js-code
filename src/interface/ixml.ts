@@ -111,6 +111,10 @@ interface IXMLMeta {
 }
 
 interface IXMLGlobal {
+    /**
+     * Get XML/HTML string from object notation
+     * @param xmlObj XML/HTML string
+     */
     toXMLString(xmlObj: any): string;
     XML: { new(): IXMLMethods };
     XMLTag: { new(tagName: string, parent?: IXMLTag): IXMLTagMethods };
