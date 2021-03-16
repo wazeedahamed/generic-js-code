@@ -326,9 +326,9 @@ define("class/xml-tag", ["require", "exports"], function (require, exports) {
             return this;
         };
         XMLTag.prototype.another = function () {
-            var _a = this, info = _a.info, tag = _a.tag, newData = _a.newData;
-            info.meta.parts > 0 && (this.info = newData(),
-                tag.data.another = this.info);
+            var _a = this, info = _a.info, newData = _a.newData;
+            (info.meta.parts > 0 || window.isValid(info.attr) || window.isValid(info.prop)) && (this.info = newData(),
+                info.another = this.info);
             return this;
         };
         XMLTag.prototype.child = function (tagName) {
@@ -337,7 +337,12 @@ define("class/xml-tag", ["require", "exports"], function (require, exports) {
         XMLTag.prototype.sibling = function (tagName) {
             return new XMLTag(tagName, this.parent);
         };
-        XMLTag.prototype.toString = function () {
+        XMLTag.prototype.toString = function (xml) {
+            if (xml === void 0) { xml = document.implementation.createDocument(null, 'root', null); }
+            var _a = this.tag, name = _a.name, data = _a.data;
+            var root = xml.createElement('root');
+            this.processXMLNode(xml, name, data, root);
+            console.log(root);
             throw Error("Not Implemented: toString");
             return "";
         };
@@ -352,6 +357,44 @@ define("class/xml-tag", ["require", "exports"], function (require, exports) {
                     parts: 0
                 }
             };
+        };
+        XMLTag.prototype.processXMLNode = function (xml, name, data, parent) {
+            var _a;
+            var count = 0;
+            var prop = data.prop, attr = data.attr, text = data.text, html = data.html, child = data.child, meta = data.meta, another = data.another;
+            var element = xml.createElement(name);
+            parent.insertAdjacentElement("beforeend", element);
+            for (var property in prop) {
+                prop[property] && (element.setAttribute(property, prop[property]));
+            }
+            for (var attribute in attr) {
+                element.setAttribute(attribute, attr[attribute]);
+            }
+            while (count++ < meta.parts) {
+                switch (true) {
+                    case text.hasOwnProperty(count):
+                        {
+                            element.insertAdjacentText("beforeend", text[count]);
+                        }
+                        break;
+                    case html.hasOwnProperty(count):
+                        {
+                            element.insertAdjacentHTML("beforeend", html[count]);
+                        }
+                        break;
+                    case child.hasOwnProperty(count):
+                        {
+                            var _b = child[count], cname = _b.name, cdata = _b.data;
+                            this.processXMLNode(xml, cname, cdata, element);
+                        }
+                        break;
+                }
+            }
+            if (!window.isNull(another) && (((_a = another === null || another === void 0 ? void 0 : another.meta.parts) !== null && _a !== void 0 ? _a : 0) > 0 ||
+                window.isValid(another === null || another === void 0 ? void 0 : another.attr) ||
+                window.isValid(another === null || another === void 0 ? void 0 : another.prop))) {
+                this.processXMLNode(xml, name, another, parent);
+            }
         };
         return XMLTag;
     }());

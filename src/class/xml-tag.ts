@@ -50,10 +50,10 @@ class XMLTag implements IXMLTagMethods {
         return this;
     }
     another() {
-        const { info, tag, newData } = this;
-        info.meta.parts > 0 && (
+        const { info, newData } = this;
+        (info.meta.parts > 0 || window.isValid(info.attr) || window.isValid(info.prop)) && (
             this.info = newData(),
-            tag.data.another = this.info
+            info.another = this.info
         );
         return this;
     }
@@ -63,9 +63,11 @@ class XMLTag implements IXMLTagMethods {
     sibling(tagName: string) {
         return new XMLTag(tagName, this.parent);
     }
-    toString() {
-        throw Error("Not Implemented: toString");
-        return "";
+    toString(xml: XMLDocument = document.implementation.createDocument(null, 'root', null)) {
+        const { name, data } = this.tag;
+        const root: HTMLElement = xml.createElement('root');
+        this.processXMLNode(xml, name, data, root);
+        return new XMLSerializer().serializeToString(root).replace(/^(<root>)|(<\/root>)$/g, '');;
     }
     private newData(): IXMLTagInfo {
         return {
@@ -78,6 +80,37 @@ class XMLTag implements IXMLTagMethods {
                 parts: 0
             }
         };
+    }
+    private processXMLNode(xml: XMLDocument, name: string, data: IXMLTagInfo, parent: HTMLElement) {
+        let count = 0;
+        const { prop, attr, text, html, child, meta, another } = data;
+        const element: HTMLElement = xml.createElement(name);
+        parent.insertAdjacentElement("beforeend", element);
+        for (const property in prop) {
+            prop[property] && (element.setAttribute(property, prop[property] as any));
+        }
+        for (const attribute in attr) {
+            element.setAttribute(attribute, attr[attribute] as any);
+        }
+        while (count++ < meta.parts) {
+            switch (true) {
+                case text.hasOwnProperty(count): { element.insertAdjacentText("beforeend", text[count]) } break;
+                case html.hasOwnProperty(count): { element.insertAdjacentHTML("beforeend", html[count]) } break;
+                case child.hasOwnProperty(count): {
+                    const { name: cname, data: cdata } = child[count];
+                    this.processXMLNode(xml, cname, cdata, element);
+                } break;
+            }
+        }
+        if (
+            !window.isNull(another) && (
+                (another?.meta.parts ?? 0) > 0 ||
+                window.isValid(another?.attr) ||
+                window.isValid(another?.prop)
+            )
+        ) {
+            this.processXMLNode(xml, name, another as any, parent);
+        }
     }
 }
 

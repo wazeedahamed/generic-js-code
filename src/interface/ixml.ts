@@ -43,7 +43,7 @@ interface IXMLTagMethods {
     /**
      * Get XML/HTML string
      */
-    toString(): string;
+    toString(xml?: XMLDocument): string;
 }
 
 interface IXMLMethods {
